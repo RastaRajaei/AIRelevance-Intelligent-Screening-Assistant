@@ -29,76 +29,63 @@ The tool leverages the following pre-trained models from Hugging Face:
 1. Install required libraries:
    ```bash
    pip install bibtexparser python-docx transformers accelerate sentencepiece
+   ```
+2. Mount your Google Drive in Colab to access `.bib` files.
+3. (Optional) Set up a Hugging Face access token for `google/embeddinggemma-300m`:
+   - Create a Fine-grained token with "Read access to contents of all public gated repos you can access" at [Hugging Face Settings](https://huggingface.co/settings/tokens).
+   - Set the token as an environment variable:
+     ```python
+     import os
+     os.environ["HF_TOKEN"] = "your_hf_token"
+     ```
+   - Or use `!huggingface-cli login` in Colab.
 
-Mount your Google Drive in Colab to access .bib files.
-(Optional) Set up a Hugging Face access token for google/embeddinggemma-300m:
+## Usage
 
-Create a Fine-grained token with "Read access to contents of all public gated repos you can access" at Hugging Face Settings.
-Set the token as an environment variable:
-pythonimport os
-os.environ["HF_TOKEN"] = "your_hf_token"
-Or use !huggingface-cli login in Colab.
+1. Place your `.bib` files in a Google Drive folder (e.g., `/content/drive/MyDrive/Research/Bibtex_Folder`).
+2. Update the `folder_path` variable in the script to point to your folder.
+3. Choose a model in the `load_model` function (inside `classify_articles.ipynb`):
+   - For `google/embeddinggemma-300m`: Requires HF token, higher accuracy for complex tasks.
+   - For `sentence-transformers/all-MiniLM-L6-v2`: No token needed, faster for large datasets.
+4. Run the script in Colab. The script will:
+   - Load `.bib` files and extract title/abstract.
+   - Generate embeddings using the selected model.
+   - Compute cosine similarity with the query.
+   - Save results to:
+     - `classified_articles.csv`: Contains article details (ID, title, abstract), similarity scores, source file, and category (related/unrelated).
+     - `related.bib`: Articles classified as relevant (score ≥ 0.50).
+     - `unrelated.bib`: Articles classified as non-relevant (score < 0.50).
 
+## Code
 
+The main script is available in `classify_articles.ipynb`. To switch between models, uncomment the desired model in the `load_model` function:
+- For EmbeddingGemma: `model_name = "google/embeddinggemma-300m"`
+- For MiniLM: `model_name = "sentence-transformers/all-MiniLM-L6-v2"`
 
-Usage
+## License
 
-Place your .bib files in a Google Drive folder (e.g., /content/drive/MyDrive/Research/Bibtex_Folder).
-Update the folder_path variable in the script to point to your folder.
-Choose a model in the load_model function:
+- **Project License**: MIT (see [LICENSE](LICENSE) file for details).
+- **Model Licenses**:
+  - `google/embeddinggemma-300m`: Apache 2.0 (see [Hugging Face Model Card](https://huggingface.co/google/embeddinggemma-300m)).
+  - `sentence-transformers/all-MiniLM-L6-v2`: Apache 2.0 (see [Hugging Face Model Card](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)).
+- Ensure compliance with each model's license when using or redistributing.
 
-For google/embeddinggemma-300m: Requires HF token, higher accuracy for complex tasks.
-For sentence-transformers/all-MiniLM-L6-v2: No token needed, faster for large datasets.
+## Notes
 
+- The similarity threshold (default: 0.50) can be adjusted for higher recall (e.g., 0.40) or precision (e.g., 0.65). Lower thresholds are recommended for systematic reviews to minimize missing relevant articles.
+- Do not share your Hugging Face token publicly. Use environment variables or secure storage.
+- Input `.bib` files should contain valid BibTeX entries with `title` and `abstract` fields for best results.
+- For large datasets, consider saving embeddings (`np.save`) to avoid recomputation.
+- Manual review of the `related.bib` output is recommended to ensure no relevant articles are missed.
 
-Run the script in Colab. The script will:
+## Citation
 
-Load .bib files and extract title/abstract.
-Generate embeddings using the selected model.
-Compute cosine similarity with the query.
-Save results to:
-
-classified_articles.csv: Contains article details (ID, title, abstract), similarity scores, source file, and category (related/unrelated).
-related.bib: Articles classified as relevant (score ≥ 0.50).
-unrelated.bib: Articles classified as non-relevant (score < 0.50).
-
-
-
-Code
-The main script is available in classify_articles.py. To switch between models, uncomment the desired model in the load_model function:
-
-For EmbeddingGemma: model_name = "google/embeddinggemma-300m"
-For MiniLM: model_name = "sentence-transformers/all-MiniLM-L6-v2"
-
-License
-
-Project License: MIT (see LICENSE file for details).
-Model Licenses:
-
-google/embeddinggemma-300m: Apache 2.0 (see Hugging Face Model Card).
-sentence-transformers/all-MiniLM-L6-v2: Apache 2.0 (see Hugging Face Model Card).
-
-
-Ensure compliance with each model's license when using or redistributing.
-
-Notes
-
-The similarity threshold (default: 0.50) can be adjusted for higher recall (e.g., 0.40) or precision (e.g., 0.65). Lower thresholds are recommended for systematic reviews to minimize missing relevant articles.
-Do not share your Hugging Face token publicly. Use environment variables or secure storage.
-Input .bib files should contain valid BibTeX entries with title and abstract fields for best results.
-For large datasets, consider saving embeddings (np.save) to avoid recomputation.
-Manual review of the related.bib output is recommended to ensure no relevant articles are missed.
-
-Citation
 If you use this code or models in your research, please cite:
+- **Models**:
+  - Google DeepMind, EmbeddingGemma, [Hugging Face](https://huggingface.co/google/embeddinggemma-300m), [Kaggle](https://www.kaggle.com/models/google/embedding-gemma).
+  - Sentence Transformers, all-MiniLM-L6-v2, [Hugging Face](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2).
+- **This Repository**: [https://github.com/RastaRajaei/AIRelevance-Intelligent-Screening-Assistant](https://github.com/RastaRajaei/AIRelevance-Intelligent-Screening-Assistant)
 
-Models:
+## Acknowledgments
 
-Google DeepMind, EmbeddingGemma, Hugging Face, Kaggle.
-Sentence Transformers, all-MiniLM-L6-v2, Hugging Face.
-
-
-This Repository: https://github.com/RastaRajaei/AIRelevance-Intelligent-Screening-Assistant.git
-
-Acknowledgments
 This project was developed to support systematic reviews in forest inventory using UAV-RGB imagery and CNNs. Thanks to Google DeepMind and the Sentence Transformers team for providing open-access models under the Apache 2.0 license.
